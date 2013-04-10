@@ -28,6 +28,3 @@ override_dh_auto_test:
 override_dh_auto_configure:
 	./autogen.sh
 	./configure $(confflags)
-
-override_dh_install:
-	dh_install --fail-missing
