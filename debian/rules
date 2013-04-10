@@ -1,0 +1,33 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+deb_host_multiarch := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+# common configure flags
+confflags += --prefix=/usr
+confflags += --sharedstatedir=/var/lib
+confflags += --libexecdir=/usr/lib
+confflags += --localstatedir=/var/lib
+confflags += --infodir=/usr/share/info
+confflags += --mandir=/usr/share/man
+confflags += --with-pop=yes
+
+# multiarch compatibility
+confflags += --with-crt-dir=/usr/lib/$(deb_host_multiarch)
+
+# Just Gtk for now...
+confflags += --with-x=yes
+confflags += --with-x-toolkit=gtk3
+
+%:
+	dh $@ --parallel
+
+# Disable tests, because some fail.
+override_dh_auto_test:
+
+override_dh_auto_configure:
+	./autogen.sh
+	./configure $(confflags)
+
+override_dh_install:
+	dh_install --fail-missing

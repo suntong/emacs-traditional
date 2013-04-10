@@ -1,0 +1,5 @@
+emacs-snapshot (0-0ubuntu1) UNRELEASED; urgency=low
+
+  * Dummy changelog used exclusively for launchpad recipe auto builds.
+
+ -- Robert Bruce Park <r@robru.ca>  Tue, 09 Apr 2013 19:35:50 -0700
