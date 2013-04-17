@@ -35,7 +35,8 @@ Standards-Version: 3.9.4
 
 Package: emacs-snapshot
 Architecture: any
-Depends: ${misc:Depends},
+Depends: emacsen-common,
+         ${misc:Depends},
          ${shlibs:Depends},
 Provides: editor, emacsen, info-browser, mail-reader, news-reader
 Conflicts: emacs24, emacs24-lucid, emacs24-nox
