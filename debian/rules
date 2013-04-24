@@ -19,10 +19,6 @@ nox_src = $(CURDIR)-nox
 gtk_pkg = emacs-snapshot
 nox_pkg = emacs-snapshot-nox
 
-# Debian tmp dirs
-gtk_deb = debian/$(gtk_pkg)
-nox_deb = debian/$(nox_pkg)
-
 # Gtk config options
 confflags_gtk += $(confflags)
 confflags_gtk += --srcdir=$(gtk_src)
@@ -31,9 +27,8 @@ confflags_gtk += --with-x-toolkit=gtk3
 
 # Gtk dh options
 auto_gtk += --package=$(gtk_pkg)
-auto_gtk += --tmpdir=$(gtk_deb)
 auto_gtk += --sourcedirectory=$(gtk_src)
-auto_gtk += --builddirectory=build/gtk
+auto_gtk += --builddirectory=$(gtk_src)/build
 
 # NoX config options
 confflags_nox += $(confflags)
@@ -42,9 +37,8 @@ confflags_nox += --with-x=no
 
 # NoX dh options
 auto_nox += --package=$(nox_pkg)
-auto_nox += --tmpdir=$(nox_deb)
 auto_nox += --sourcedirectory=$(nox_src)
-auto_nox += --builddirectory=build/nox
+auto_nox += --builddirectory=$(nox_src)/build
 
 # Disable tests, because some fail.
 override_dh_auto_test:
@@ -65,12 +59,17 @@ override_dh_auto_build:
 	dh_auto_build $(auto_gtk)
 	dh_auto_build $(auto_nox)
 
+# By default dh_auto_install will dump both packages into debian/tmp,
+# with the second one clobbering the first one, so we used --destdir to
+# force installation into different places.
 override_dh_auto_install:
-	dh_auto_install $(auto_gtk) --destdir=$(gtk_deb)
-	dh_auto_install $(auto_nox) --destdir=$(nox_deb)
+	dh_auto_install $(auto_gtk) --destdir=debian/$(gtk_pkg)
+	dh_auto_install $(auto_nox) --destdir=debian/$(nox_pkg)
 
-# Disable this because files are already in the right place.
+# Because --destdir above installs directly into the correct place,
+# dh_install is not necessary. It would just try to copy files from debian/tmp,
+# which does not exist.
 override_dh_install:
 
 %:
-	dh $@ # --parallel
+	dh $@ --parallel
