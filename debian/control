@@ -39,13 +39,15 @@ Depends: emacsen-common,
          ${misc:Depends},
          ${shlibs:Depends},
 Provides: editor, emacsen, info-browser, mail-reader, news-reader
-Conflicts: emacs24,
+Conflicts: emacs-snapshot-nox,
+           emacs24,
            emacs24-bin-common,
            emacs24-common,
            emacs24-common-non-dfsg,
            emacs24-lucid,
            emacs24-nox,
-Replaces: emacs24,
+Replaces: emacs-snapshot-nox,
+          emacs24,
           emacs24-bin-common,
           emacs24-common,
           emacs24-common-non-dfsg,
@@ -54,3 +56,27 @@ Replaces: emacs24,
 Description: GNU Emacs editor (with GTK+ user interface)
  GNU Emacs is the extensible self-documenting text editor.
  This package contains a version of Emacs with a GTK+ user interface.
+
+Package: emacs-snapshot-nox
+Architecture: any
+Depends: emacsen-common,
+         ${misc:Depends},
+         ${shlibs:Depends},
+Provides: editor, emacsen, info-browser, mail-reader, news-reader
+Conflicts: emacs-snapshot,
+           emacs24,
+           emacs24-bin-common,
+           emacs24-common,
+           emacs24-common-non-dfsg,
+           emacs24-lucid,
+           emacs24-nox,
+Replaces: emacs-snapshot,
+          emacs24,
+          emacs24-bin-common,
+          emacs24-common,
+          emacs24-common-non-dfsg,
+          emacs24-lucid,
+          emacs24-nox,
+Description: GNU Emacs editor (with text-only user interface)
+ GNU Emacs is the extensible self-documenting text editor.
+ This package contains a version of Emacs without a graphical user interface.

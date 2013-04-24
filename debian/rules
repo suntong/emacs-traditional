@@ -1,8 +1,6 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
-deb_host_multiarch := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
-
 # common configure flags
 confflags += --prefix=/usr
 confflags += --sharedstatedir=/var/lib
@@ -12,19 +10,67 @@ confflags += --infodir=/usr/share/info
 confflags += --mandir=/usr/share/man
 confflags += --with-pop=yes
 
-# multiarch compatibility
-confflags += --with-crt-dir=/usr/lib/$(deb_host_multiarch)
+# Source directories (it was necessary to duplicate the source tree in
+# order to avoid cross-contamination between builds)
+gtk_src = $(CURDIR)
+nox_src = $(CURDIR)-nox
 
-# Just Gtk for now...
-confflags += --with-x=yes
-confflags += --with-x-toolkit=gtk3
+# Binary package names (as defined in debian/control)
+gtk_pkg = emacs-snapshot
+nox_pkg = emacs-snapshot-nox
 
-%:
-	dh $@ --parallel
+# Debian tmp dirs
+gtk_deb = debian/$(gtk_pkg)
+nox_deb = debian/$(nox_pkg)
+
+# Gtk config options
+confflags_gtk += $(confflags)
+confflags_gtk += --srcdir=$(gtk_src)
+confflags_gtk += --with-x=yes
+confflags_gtk += --with-x-toolkit=gtk3
+
+# Gtk dh options
+auto_gtk += --package=$(gtk_pkg)
+auto_gtk += --tmpdir=$(gtk_deb)
+auto_gtk += --sourcedirectory=$(gtk_src)
+auto_gtk += --builddirectory=build/gtk
+
+# NoX config options
+confflags_nox += $(confflags)
+confflags_nox += --srcdir=$(nox_src)
+confflags_nox += --with-x=no
+
+# NoX dh options
+auto_nox += --package=$(nox_pkg)
+auto_nox += --tmpdir=$(nox_deb)
+auto_nox += --sourcedirectory=$(nox_src)
+auto_nox += --builddirectory=build/nox
 
 # Disable tests, because some fail.
 override_dh_auto_test:
 
+override_dh_auto_clean:
+	dh_auto_clean $(auto_gtk)
+	rm -rf $(nox_src)
+	cp -r $(gtk_src) $(nox_src)
+	dh_auto_clean $(auto_nox)
+
 override_dh_auto_configure:
-	./autogen.sh
-	./configure $(confflags)
+	cd $(gtk_src) && ./autogen.sh
+	dh_auto_configure $(auto_gtk) -- $(confflags_gtk)
+	cd $(nox_src) && ./autogen.sh
+	dh_auto_configure $(auto_nox) -- $(confflags_nox)
+
+override_dh_auto_build:
+	dh_auto_build $(auto_gtk)
+	dh_auto_build $(auto_nox)
+
+override_dh_auto_install:
+	dh_auto_install $(auto_gtk) --destdir=$(gtk_deb)
+	dh_auto_install $(auto_nox) --destdir=$(nox_deb)
+
+# Disable this because files are already in the right place.
+override_dh_install:
+
+%:
+	dh $@ # --parallel
