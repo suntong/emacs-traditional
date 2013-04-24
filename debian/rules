@@ -66,10 +66,10 @@ override_dh_auto_install:
 	dh_auto_install $(auto_gtk) --destdir=debian/$(gtk_pkg)
 	dh_auto_install $(auto_nox) --destdir=debian/$(nox_pkg)
 
-# Because --destdir above installs directly into the correct place,
-# dh_install is not necessary. It would just try to copy files from debian/tmp,
-# which does not exist.
+# --destdir above circumvents dh_install, however we need to strip
+# images from the NoX build because it can't use them anyway.
 override_dh_install:
+	rm -vrf debian/$(nox_pkg)/usr/share/emacs/*/etc/images
 
 %:
 	dh $@ --parallel
