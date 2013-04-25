@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+# update-alternatives on things that collide with xemacs, other editors
+for i in emacsclient ctags emacs grep-changelog etags ebrowse
+do
+    update-alternatives \
+        --install /usr/bin/$i $i /usr/bin/$i-snapshot 27 \
+        --slave /usr/share/man/man1/$i.1.gz $i.1.gz \
+                /usr/share/man/man1/$i-snapshot.1.gz
+done
+
+#DEBHELPER#

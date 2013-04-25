@@ -11,11 +11,7 @@
 # common configure flags
 confflags += --prefix=/usr
 confflags += --sharedstatedir=/var/lib
-confflags += --libexecdir=/usr/lib
-confflags += --localstatedir=/var/lib
-confflags += --infodir=/usr/share/info
-confflags += --mandir=/usr/share/man
-confflags += --with-pop=yes
+confflags += --program-suffix="-snapshot"
 
 # Binary package names (as defined in debian/control)
 gtk_pkg_name = emacs-snapshot
@@ -38,9 +34,6 @@ confflags_nox += --with-x=no
 auto_nox += --package=$(nox_pkg_name)
 auto_nox += --builddirectory=build/nox
 
-# Disable tests, because some fail.
-override_dh_auto_test:
-
 override_dh_auto_clean:
 	dh_auto_clean $(auto_gtk)
 	dh_auto_clean $(auto_nox)
@@ -53,6 +46,11 @@ override_dh_auto_configure:
 override_dh_auto_build:
 	dh_auto_build $(auto_gtk)
 	dh_auto_build $(auto_nox)
+
+# Run tests, but don't allow failures to stop the build.
+override_dh_auto_test:
+	dh_auto_test $(auto_gtk) || true
+	dh_auto_test $(auto_nox) || true
 
 # By default dh_auto_install will dump both packages into debian/tmp,
 # with the second one clobbering the first one, so we used --destdir to
@@ -73,6 +71,10 @@ override_dh_install:
 #	Strip some unnecessary dirs
 	rm -vrf debian/*/var/
 	rm -vrf debian/*/usr/local
+#
+#	And some things lintian doesn't like
+	rm -vrf debian/*/usr/share/emacs/*/etc/copying.paper
+	rm -vrf debian/*/usr/share/emacs/*/lisp/COPYING
 
 %:
 	dh $@ --parallel
