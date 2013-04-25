@@ -94,6 +94,14 @@ override_dh_auto_test:
 override_dh_auto_install: $(autogen_install_files)
 	dh_auto_install $(auto_gtk) --destdir=debian/$(gtk_pkg_name)
 	dh_auto_install $(auto_nox) --destdir=debian/$(nox_pkg_name)
+#
+#	Find the binaries that we need to pass to update-alternatives.
+	alternatives=`ls debian/$(gtk_pkg_name)/usr/bin | xargs`  \
+	  && set -x  \
+	  && for f in debian/emacs*.*;  \
+	  do  \
+	    perl -pwi -e "s|\@ALTERNATIVES\@|$${alternatives}|go" $$f;  \
+	  done
 
 # Use of --destdir above causes the default dh_install to fail,
 # because it looks for files in debian/tmp (which does not exist). So

@@ -5,9 +5,10 @@ set -e
 # update-alternatives on things that collide with xemacs, other editors
 if [ "$1" != "upgrade" ]
 then
-    for i in emacsclient ctags emacs grep-changelog etags ebrowse
+    for alt in @ALTERNATIVES@
     do
-        update-alternatives --remove $i /usr/bin/$i-snapshot
+        base=$(echo $alt | perl -pe 's/@SUFFIX@$//')
+        update-alternatives --remove $base /usr/bin/$alt
     done
 fi
 
