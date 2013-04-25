@@ -13,8 +13,10 @@ confflags += --prefix=/usr
 confflags += --sharedstatedir=/var/lib
 confflags += --program-suffix="-snapshot"
 
-# Binary package names (as defined in debian/control)
-gtk_pkg_name = emacs-snapshot
+# Parse debian/control to determine the binary package names. Assumes
+# that the first binary package listed is the gtk package, and then
+# appends -nox as the NoX variant.
+gtk_pkg_name = $(shell perl -ne 's/Package:\s+// && print && exit' debian/control)
 nox_pkg_name = $(gtk_pkg_name)-nox
 
 # Gtk config options
@@ -59,13 +61,16 @@ override_dh_auto_install:
 	dh_auto_install $(auto_gtk) --destdir=debian/$(gtk_pkg_name)
 	dh_auto_install $(auto_nox) --destdir=debian/$(nox_pkg_name)
 
+# Use of --destdir above causes the default dh_install to fail,
+# because it looks for files in debian/tmp (which does not exist). So
+# override it to instead delete the files we don't want
 override_dh_install:
 #	Strip images from NoX.
 	rm -vrf debian/$(nox_pkg_name)/usr/share/emacs/*/etc/images
 #
 #	Strip non-byte-compiled versions of byte-compiled files.
-	find debian/ -name '*.elc'                             \
-		| perl -pe 's/(.*)\.elc/\1.el\n\1.el.gz/g'     \
+	find debian/ -name '*.elc'  \
+		| perl -pe 's/(.*)\.elc/\1.el\n\1.el.gz/g'  \
 		| xargs rm -vf
 #
 #	Strip some unnecessary dirs
