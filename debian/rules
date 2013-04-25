@@ -20,8 +20,9 @@ confflags += --prefix=/usr
 confflags += --sharedstatedir=/var/lib
 confflags += --program-suffix="$(suffix)"
 
-# These binary package names should match what's defined in debian/control
-gtk_pkg_name = emacs$(suffix)
+# These package names should match what's defined in debian/control
+src_pkg_name = emacs$(suffix)
+gtk_pkg_name = $(src_pkg_name)
 nox_pkg_name = $(gtk_pkg_name)-nox
 
 # Gtk config options
@@ -40,6 +41,34 @@ confflags_nox += --with-x=no
 # NoX dh options
 auto_nox += --package=$(nox_pkg_name)
 auto_nox += --builddirectory=build/nox
+
+# These files are created from emacsVER templates
+autogen_install_files :=  \
+  debian/$(gtk_pkg_name).install  \
+  debian/$(gtk_pkg_name).postinst  \
+  debian/$(gtk_pkg_name).prerm  \
+  debian/$(nox_pkg_name).install  \
+  debian/$(nox_pkg_name).postinst  \
+  debian/$(nox_pkg_name).prerm
+
+define deb_sub
+  perl -p  \
+    -e "s|\@SUFFIX\@|$(suffix)|go;"  \
+    -e "s|\@PKG_NAME\@|$(pkg_name)|go;"  \
+      < $(1) > $(2)
+endef
+
+# Set pkg_name depending on which we are currently building.
+debian/$(gtk_pkg_name).%: pkg_name := $(gtk_pkg_name)
+debian/$(nox_pkg_name).%: pkg_name := $(nox_pkg_name)
+
+# Build emacs-snapshot.{install,...} from emacsVER.{install,...}
+debian/$(gtk_pkg_name).%: debian/emacsVER.%
+	$(call deb_sub,$<,$@)
+
+# Build emacs-snapshot-nox.{install,...} from emacsVER.{install,...}
+debian/$(nox_pkg_name).%: debian/emacsVER.%
+	$(call deb_sub,$<,$@)
 
 override_dh_auto_clean:
 	dh_auto_clean $(auto_gtk)
@@ -62,7 +91,7 @@ override_dh_auto_test:
 # By default dh_auto_install will dump both packages into debian/tmp,
 # with the second one clobbering the first one, so we used --destdir to
 # force installation into different places.
-override_dh_auto_install:
+override_dh_auto_install: $(autogen_install_files)
 	dh_auto_install $(auto_gtk) --destdir=debian/$(gtk_pkg_name)
 	dh_auto_install $(auto_nox) --destdir=debian/$(nox_pkg_name)
 
