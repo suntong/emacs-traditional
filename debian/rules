@@ -1,6 +1,13 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+# This file is licensed under the terms of the Gnu Public License.
+# Copyright 2013 Robert Bruce Park <r@robru.ca>
+
+# Some inspiration taken from the Emacs' debian/rules file created by
+# Mark Eichin, Ian Jackson, Jérôme Marant, and Rob Browning, however
+# the code below was largely rewritten from scratch in 2013.
+
 # common configure flags
 confflags += --prefix=/usr
 confflags += --sharedstatedir=/var/lib
@@ -16,8 +23,8 @@ gtk_src = $(CURDIR)
 nox_src = $(CURDIR)-nox
 
 # Binary package names (as defined in debian/control)
-gtk_pkg = emacs-snapshot
-nox_pkg = emacs-snapshot-nox
+gtk_pkg_name = emacs-snapshot
+nox_pkg_name = $(gtk_pkg_name)-nox
 
 # Gtk config options
 confflags_gtk += $(confflags)
@@ -26,7 +33,7 @@ confflags_gtk += --with-x=yes
 confflags_gtk += --with-x-toolkit=gtk3
 
 # Gtk dh options
-auto_gtk += --package=$(gtk_pkg)
+auto_gtk += --package=$(gtk_pkg_name)
 auto_gtk += --sourcedirectory=$(gtk_src)
 auto_gtk += --builddirectory=$(gtk_src)/build
 
@@ -36,7 +43,7 @@ confflags_nox += --srcdir=$(nox_src)
 confflags_nox += --with-x=no
 
 # NoX dh options
-auto_nox += --package=$(nox_pkg)
+auto_nox += --package=$(nox_pkg_name)
 auto_nox += --sourcedirectory=$(nox_src)
 auto_nox += --builddirectory=$(nox_src)/build
 
@@ -63,13 +70,21 @@ override_dh_auto_build:
 # with the second one clobbering the first one, so we used --destdir to
 # force installation into different places.
 override_dh_auto_install:
-	dh_auto_install $(auto_gtk) --destdir=debian/$(gtk_pkg)
-	dh_auto_install $(auto_nox) --destdir=debian/$(nox_pkg)
+	dh_auto_install $(auto_gtk) --destdir=debian/$(gtk_pkg_name)
+	dh_auto_install $(auto_nox) --destdir=debian/$(nox_pkg_name)
 
-# --destdir above circumvents dh_install, however we need to strip
-# images from the NoX build because it can't use them anyway.
 override_dh_install:
-	rm -vrf debian/$(nox_pkg)/usr/share/emacs/*/etc/images
+#	Strip images from NoX.
+	rm -vrf debian/$(nox_pkg_name)/usr/share/emacs/*/etc/images
+#
+#	Strip non-byte-compiled versions of byte-compiled files.
+	find debian/ -name '*.elc'                             \
+		| perl -pe 's/(.*)\.elc/\1.el\n\1.el.gz/g'     \
+		| xargs rm -vf
+#
+#	Strip some unnecessary dirs
+	rm -vrf debian/*/var/
+	rm -vrf debian/*/usr/local
 
 %:
 	dh $@ --parallel
