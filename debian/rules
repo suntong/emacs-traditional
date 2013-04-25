@@ -8,15 +8,20 @@
 # Mark Eichin, Ian Jackson, Jérôme Marant, and Rob Browning, however
 # the code below was largely rewritten from scratch in 2013.
 
+# What suffix should we append to "emacs" to make it parallel-installable?
+# Currently this rules file is only used for daily snapshots so this value will
+# only ever be "-snapshot", however later on this should make it very
+# easy to transition from "emacs-snapshot" to "emacs24" as necessary.
+suffix = $(shell dpkg-parsechangelog  \
+		| perl -ne 's/Source: emacs// && print && exit')
+
 # common configure flags
 confflags += --prefix=/usr
 confflags += --sharedstatedir=/var/lib
-confflags += --program-suffix="-snapshot"
+confflags += --program-suffix="$(suffix)"
 
-# Parse debian/control to determine the binary package names. Assumes
-# that the first binary package listed is the gtk package, and then
-# appends -nox as the NoX variant.
-gtk_pkg_name = $(shell perl -ne 's/Package:\s+// && print && exit' debian/control)
+# These binary package names should match what's defined in debian/control
+gtk_pkg_name = emacs$(suffix)
 nox_pkg_name = $(gtk_pkg_name)-nox
 
 # Gtk config options
