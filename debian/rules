@@ -17,49 +17,37 @@ confflags += --infodir=/usr/share/info
 confflags += --mandir=/usr/share/man
 confflags += --with-pop=yes
 
-# Source directories (it was necessary to duplicate the source tree in
-# order to avoid cross-contamination between builds)
-gtk_src = $(CURDIR)
-nox_src = $(CURDIR)-nox
-
 # Binary package names (as defined in debian/control)
 gtk_pkg_name = emacs-snapshot
 nox_pkg_name = $(gtk_pkg_name)-nox
 
 # Gtk config options
 confflags_gtk += $(confflags)
-confflags_gtk += --srcdir=$(gtk_src)
 confflags_gtk += --with-x=yes
 confflags_gtk += --with-x-toolkit=gtk3
 
 # Gtk dh options
 auto_gtk += --package=$(gtk_pkg_name)
-auto_gtk += --sourcedirectory=$(gtk_src)
-auto_gtk += --builddirectory=$(gtk_src)/build
+auto_gtk += --builddirectory=build/gtk
 
 # NoX config options
 confflags_nox += $(confflags)
-confflags_nox += --srcdir=$(nox_src)
 confflags_nox += --with-x=no
 
 # NoX dh options
 auto_nox += --package=$(nox_pkg_name)
-auto_nox += --sourcedirectory=$(nox_src)
-auto_nox += --builddirectory=$(nox_src)/build
+auto_nox += --builddirectory=build/nox
 
 # Disable tests, because some fail.
 override_dh_auto_test:
 
 override_dh_auto_clean:
 	dh_auto_clean $(auto_gtk)
-	rm -rf $(nox_src)
-	cp -r $(gtk_src) $(nox_src)
 	dh_auto_clean $(auto_nox)
 
 override_dh_auto_configure:
-	cd $(gtk_src) && ./autogen.sh
+	./autogen.sh
 	dh_auto_configure $(auto_gtk) -- $(confflags_gtk)
-	cd $(nox_src) && ./autogen.sh
 	dh_auto_configure $(auto_nox) -- $(confflags_nox)
 
 override_dh_auto_build:
