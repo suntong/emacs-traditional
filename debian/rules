@@ -1,17 +1,35 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+
 # This file is licensed under the terms of the Gnu Public License.
 # Copyright 2013 Robert Bruce Park <r@robru.ca>
+
 
 # Some inspiration taken from the Emacs' debian/rules file created by
 # Mark Eichin, Ian Jackson, Jérôme Marant, and Rob Browning, however
 # the code below was largely rewritten from scratch in 2013.
 
+
+# This packaging data is intended to be usable both for building
+# snapshots or for building stable release packages. Everything here
+# parses debian/changelog in order to determine what kind of package
+# names to use. Debian is a little bit fussy about needing
+# debian/control to exist before it'll allow debian/rules to
+# create it, so unfortunately we need both control and control.in
+# checked into version control. Currently this branch is set up for
+# snapshot builds, however if you want to package a stable release,
+# all you have to do is change "emacs-snapshot" to "emacs24" in
+# debian/changelog, and then run this command:
+#
+#    $ make -f debian/rules debian/control
+#
+# That will rebuild debian/control with the new package names, and
+# you'll then be able to proceed with the package build as usual.
+
+
 # What suffix should we append to "emacs" to make it parallel-installable?
-# Currently this rules file is only used for daily snapshots so this value will
-# only ever be "-snapshot", however later on this should make it very
-# easy to transition from "emacs-snapshot" to "emacs24" as necessary.
+# Generally "-snapshot", however it could be "23" or "24" as necessary.
 suffix = $(shell dpkg-parsechangelog  \
 		| perl -ne 's/Source: emacs// && print && exit')
 
@@ -20,7 +38,7 @@ confflags += --prefix=/usr
 confflags += --sharedstatedir=/var/lib
 confflags += --program-suffix="$(suffix)"
 
-# These package names should match what's defined in debian/control
+# These package names are used to create debian/control
 src_pkg_name = emacs$(suffix)
 gtk_pkg_name = $(src_pkg_name)
 nox_pkg_name = $(gtk_pkg_name)-nox
@@ -55,6 +73,9 @@ define deb_sub
   perl -p  \
     -e "s|\@SUFFIX\@|$(suffix)|go;"  \
     -e "s|\@PKG_NAME\@|$(pkg_name)|go;"  \
+    -e "s|\@SRC_PKG_NAME\@|$(src_pkg_name)|go;"  \
+    -e "s|\@GTK_PKG_NAME\@|$(gtk_pkg_name)|go;"  \
+    -e "s|\@NOX_PKG_NAME\@|$(nox_pkg_name)|go;"  \
       < $(1) > $(2)
 endef
 
@@ -70,6 +91,10 @@ debian/$(gtk_pkg_name).%: debian/emacsVER.%
 debian/$(nox_pkg_name).%: debian/emacsVER.%
 	$(call deb_sub,$<,$@)
 
+# Build control from control.in.
+debian/%: debian/%.in debian/changelog debian/rules
+	$(call deb_sub,$<,$@)
+
 override_dh_auto_clean:
 	dh_auto_clean $(auto_gtk)
 	dh_auto_clean $(auto_nox)
@@ -79,7 +104,7 @@ override_dh_auto_configure:
 	dh_auto_configure $(auto_gtk) -- $(confflags_gtk)
 	dh_auto_configure $(auto_nox) -- $(confflags_nox)
 
-override_dh_auto_build:
+override_dh_auto_build: debian/control
 	dh_auto_build $(auto_gtk)
 	dh_auto_build $(auto_nox)
 
