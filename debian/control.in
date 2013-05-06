@@ -33,9 +33,17 @@ Build-Depends: autoconf,
 Homepage: http://www.gnu.org/software/emacs/
 Standards-Version: 3.9.4
 
+Package: @SRC_PKG_NAME@-common
+Architecture: all
+Depends: emacsen-common,
+         ${misc:Depends},
+Description: GNU Emacs editor (common files used by Gtk and NoX variants)
+ GNU Emacs is the extensible self-documenting text editor.
+ This package contains the files that are shared between Gtk and NoX builds.
+
 Package: @GTK_PKG_NAME@
 Architecture: any
-Depends: emacsen-common,
+Depends: @SRC_PKG_NAME@-common,
          ${misc:Depends},
          ${shlibs:Depends},
 Provides: editor, emacsen, info-browser, mail-reader, news-reader
@@ -47,7 +55,7 @@ Description: GNU Emacs editor (with GTK+ user interface)
 
 Package: @NOX_PKG_NAME@
 Architecture: any
-Depends: emacsen-common,
+Depends: @SRC_PKG_NAME@-common,
          ${misc:Depends},
          ${shlibs:Depends},
 Provides: editor, emacsen, info-browser, mail-reader, news-reader

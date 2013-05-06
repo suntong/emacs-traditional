@@ -133,20 +133,31 @@ override_dh_auto_install: $(autogen_install_files)
 # override it to instead delete the files we don't want
 override_dh_install:
 #	Strip images from NoX.
-	rm -vrf debian/$(nox_pkg_name)/usr/share/emacs/*/etc/images
+	rm -rf debian/$(nox_pkg_name)/usr/share/emacs/*/etc/images
 #
 #	Strip non-byte-compiled versions of byte-compiled files.
 	find debian/ -name '*.elc'  \
 		| perl -pe 's/(.*)\.elc/\1.el\n\1.el.gz/g'  \
-		| xargs rm -vf
+		| xargs rm -rf
 #
 #	Strip some unnecessary dirs
-	rm -vrf debian/*/var/
-	rm -vrf debian/*/usr/local
+	rm -rf debian/*/var/
+	rm -rf debian/*/usr/local
 #
 #	And some things lintian doesn't like
-	rm -vrf debian/*/usr/share/emacs/*/etc/copying.paper
-	rm -vrf debian/*/usr/share/emacs/*/lisp/COPYING
+	rm -rf debian/*/usr/share/emacs/*/etc/copying.paper
+	rm -rf debian/*/usr/share/emacs/*/lisp/COPYING
+#
+#	Identify identical files, move them into -common, and delete them
+#	from the other binary packages.
+	diff --ignore-all-space --recursive --brief --report-identical-files  \
+		debian/$(gtk_pkg_name) debian/$(nox_pkg_name)  \
+		| egrep -v '(/usr/lib|/usr/bin)'  \
+		| perl -ne 's/^Files (.*) and (.*) are identical/\1\n\2/ && print'  \
+		> common_files
+	tar cpf - --files-from common_files --remove-files  \
+		| tar xpf - --directory debian/$(src_pkg_name)-common  \
+		--strip-components=2 --overwrite
 
 %:
 	dh $@ --parallel
