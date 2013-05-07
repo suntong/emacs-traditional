@@ -64,3 +64,11 @@ Replaces: @GTK_PKG_NAME@,
 Description: GNU Emacs editor (with text-only user interface)
  GNU Emacs is the extensible self-documenting text editor.
  This package contains a version of Emacs without a graphical user interface.
+
+Package: @SRC_PKG_NAME@-el
+Architecture: all
+Depends: @SRC_PKG_NAME@-common,
+         ${misc:Depends},
+Description: GNU Emacs editor (uncompiled Elisp files)
+ GNU Emacs is the extensible self-documenting text editor.
+ Optional elisp source files that are not byte-compiled.

@@ -135,11 +135,6 @@ override_dh_install:
 #	Strip images from NoX.
 	rm -rf debian/$(nox_pkg_name)/usr/share/emacs/*/etc/images
 #
-#	Strip non-byte-compiled versions of byte-compiled files.
-	find debian/ -name '*.elc'  \
-		| perl -pe 's/(.*)\.elc/\1.el\n\1.el.gz/g'  \
-		| xargs rm -rf
-#
 #	Strip some unnecessary dirs
 	rm -rf debian/*/var/
 	rm -rf debian/*/usr/local
@@ -157,6 +152,14 @@ override_dh_install:
 		| perl -ne 's/^Files (.*) and (.*) are identical/\1\n\2/ && print'  \
 		| tar cpf - --files-from - --remove-files  \
 		| tar xpf - --directory debian/$(src_pkg_name)-common  \
+		--strip-components=2 --overwrite
+#
+#	Move non-byte-compiled versions of byte-compiled files into -el package.
+	mkdir -p debian/$(src_pkg_name)-el
+	find debian/ -name '*.elc'  \
+		| perl -pe 's/(.*)\.elc/\1.el.gz/g'  \
+		| tar cpf - --files-from - --remove-files --ignore-failed-read  \
+		| tar xpf - --directory debian/$(src_pkg_name)-el  \
 		--strip-components=2 --overwrite
 
 %:
