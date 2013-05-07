@@ -150,12 +150,12 @@ override_dh_install:
 #
 #	Identify identical files, move them into -common, and delete them
 #	from the other binary packages.
+	mkdir -p debian/$(src_pkg_name)-common
 	diff --ignore-all-space --recursive --brief --report-identical-files  \
 		debian/$(gtk_pkg_name) debian/$(nox_pkg_name)  \
 		| egrep -v '(/usr/lib|/usr/bin)'  \
 		| perl -ne 's/^Files (.*) and (.*) are identical/\1\n\2/ && print'  \
-		> common_files
-	tar cpf - --files-from common_files --remove-files  \
+		| tar cpf - --files-from - --remove-files  \
 		| tar xpf - --directory debian/$(src_pkg_name)-common  \
 		--strip-components=2 --overwrite
 
