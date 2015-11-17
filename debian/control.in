@@ -43,7 +43,7 @@ Description: GNU Emacs editor (common files used by Gtk and NoX variants)
 
 Package: @GTK_PKG_NAME@
 Architecture: any
-Depends: @SRC_PKG_NAME@-common,
+Depends: @SRC_PKG_NAME@-common (= ${source:Version}),
          ${misc:Depends},
          ${shlibs:Depends},
 Provides: editor, emacsen, info-browser, mail-reader, news-reader
@@ -55,7 +55,7 @@ Description: GNU Emacs editor (with GTK+ user interface)
 
 Package: @NOX_PKG_NAME@
 Architecture: any
-Depends: @SRC_PKG_NAME@-common,
+Depends: @SRC_PKG_NAME@-common (= ${source:Version}),
          ${misc:Depends},
          ${shlibs:Depends},
 Provides: editor, emacsen, info-browser, mail-reader, news-reader
@@ -67,7 +67,7 @@ Description: GNU Emacs editor (with text-only user interface)
 
 Package: @SRC_PKG_NAME@-el
 Architecture: all
-Depends: @SRC_PKG_NAME@-common,
+Depends: @SRC_PKG_NAME@-common (= ${source:Version}),
          ${misc:Depends},
 Description: GNU Emacs editor (uncompiled Elisp files)
  GNU Emacs is the extensible self-documenting text editor.
