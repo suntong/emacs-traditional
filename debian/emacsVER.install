@@ -1,1 +1,6 @@
-usr/
+usr/bin/emacs*
+usr/bin/ctags*
+usr/bin/ebrowse*
+usr/bin/etags*
+usr/lib/*/emacs/
+usr/share/
