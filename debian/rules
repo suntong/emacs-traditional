@@ -100,7 +100,7 @@ override_dh_auto_clean:
 	dh_auto_clean $(auto_nox)
 
 override_dh_auto_configure:
-	./autogen.sh
+	./autogen.sh all
 	dh_auto_configure $(auto_gtk) -- $(confflags_gtk)
 	dh_auto_configure $(auto_nox) -- $(confflags_nox)
 
