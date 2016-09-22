@@ -37,6 +37,7 @@ suffix = $(shell dpkg-parsechangelog  \
 confflags += --prefix=/usr
 confflags += --sharedstatedir=/var/lib
 confflags += --program-suffix="$(suffix)"
+confflags += --with-modules=yes
 
 # These package names are used to create debian/control
 src_pkg_name = emacs$(suffix)
@@ -47,6 +48,8 @@ nox_pkg_name = $(gtk_pkg_name)-nox
 confflags_gtk += $(confflags)
 confflags_gtk += --with-x=yes
 confflags_gtk += --with-x-toolkit=gtk3
+confflags_gtk += --with-xwidgets=yes
+confflags_gtk += --with-cairo=yes
 
 # Gtk dh options
 auto_gtk += --package=$(gtk_pkg_name)
