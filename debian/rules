@@ -29,9 +29,8 @@
 
 
 # What suffix should we append to "emacs" to make it parallel-installable?
-# Generally "-snapshot", however it could be "23" or "24" as necessary.
-suffix = $(shell dpkg-parsechangelog  \
-		| perl -ne 's/Source: emacs// && print && exit')
+# Generally "-snapshot", however it could be "24" or "25" as necessary.
+suffix = $(shell dpkg-parsechangelog | sed --quiet 's/Source: emacs//p')
 
 # common configure flags
 confflags += --prefix=/usr
