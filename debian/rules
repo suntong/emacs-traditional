@@ -144,6 +144,13 @@ override_dh_install:
 	rm -rf debian/*/usr/share/emacs/*/etc/copying.paper
 	rm -rf debian/*/usr/share/emacs/*/lisp/COPYING
 #
+#	Move .h files into -dev package
+	mkdir -vp debian/$(gtk_pkg_name)-dev/usr/include/ debian/$(nox_pkg_name)-dev/usr/include/
+	cp src/emacs*.h debian/$(gtk_pkg_name)-dev/usr/include/
+	cp src/emacs*.h debian/$(nox_pkg_name)-dev/usr/include/
+	cp build/gtk/src/emacs*.h debian/$(gtk_pkg_name)-dev/usr/include/
+	cp build/nox/src/emacs*.h debian/$(nox_pkg_name)-dev/usr/include/
+#
 #	Identify identical files, move them into -common, and delete them
 #	from the other binary packages.
 	mkdir -p debian/$(src_pkg_name)-common

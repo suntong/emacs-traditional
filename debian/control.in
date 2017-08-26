@@ -55,6 +55,11 @@ Description: GNU Emacs editor (with GTK+ user interface)
  GNU Emacs is the extensible self-documenting text editor.
  This package contains a version of Emacs with a GTK+ user interface.
 
+Package: @GTK_PKG_NAME@-dev
+Architecture: any
+Depends: @GTK_PKG_NAME@ (= ${source:Version}), ${misc:Depends}
+Description: C header files for the GTK build of Emacs.
+
 Package: @NOX_PKG_NAME@
 Architecture: any
 Depends: @SRC_PKG_NAME@-common (= ${source:Version}),
@@ -66,6 +71,11 @@ Replaces: @GTK_PKG_NAME@,
 Description: GNU Emacs editor (with text-only user interface)
  GNU Emacs is the extensible self-documenting text editor.
  This package contains a version of Emacs without a graphical user interface.
+
+Package: @NOX_PKG_NAME@-dev
+Architecture: any
+Depends: @NOX_PKG_NAME@ (= ${source:Version}), ${misc:Depends}
+Description: C header files for the NOX build of Emacs.
 
 Package: @SRC_PKG_NAME@-el
 Architecture: all

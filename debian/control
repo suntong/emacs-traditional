@@ -55,6 +55,11 @@ Description: GNU Emacs editor (with GTK+ user interface)
  GNU Emacs is the extensible self-documenting text editor.
  This package contains a version of Emacs with a GTK+ user interface.
 
+Package: emacs-snapshot-dev
+Architecture: any
+Depends: emacs-snapshot (= ${source:Version}), ${misc:Depends}
+Description: C header files for the GTK build of Emacs.
+
 Package: emacs-snapshot-nox
 Architecture: any
 Depends: emacs-snapshot-common (= ${source:Version}),
@@ -66,6 +71,11 @@ Replaces: emacs-snapshot,
 Description: GNU Emacs editor (with text-only user interface)
  GNU Emacs is the extensible self-documenting text editor.
  This package contains a version of Emacs without a graphical user interface.
+
+Package: emacs-snapshot-nox-dev
+Architecture: any
+Depends: emacs-snapshot-nox (= ${source:Version}), ${misc:Depends}
+Description: C header files for the NOX build of Emacs.
 
 Package: emacs-snapshot-el
 Architecture: all
