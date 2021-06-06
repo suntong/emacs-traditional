@@ -41,34 +41,23 @@ confflags += --with-modules=yes
 # These package names are used to create debian/control
 src_pkg_name = emacs$(suffix)
 gtk_pkg_name = $(src_pkg_name)
-nox_pkg_name = $(gtk_pkg_name)-nox
 
 # Gtk config options
 confflags_gtk += $(confflags)
 confflags_gtk += --with-x=yes
-confflags_gtk += --with-x-toolkit=gtk3
-confflags_gtk += --with-xwidgets=yes
+confflags_gtk += --with-x-toolkit=motif  --without-all --with-compress-info --with-gpm --with-x --with-xft --with-libotf --with-xim --with-dbus 
 
 # Gtk dh options
 auto_gtk += --package=$(gtk_pkg_name)
 auto_gtk += --builddirectory=build/gtk
 
-# NoX config options
-confflags_nox += $(confflags)
-confflags_nox += --with-x=no
 
-# NoX dh options
-auto_nox += --package=$(nox_pkg_name)
-auto_nox += --builddirectory=build/nox
 
 # These files are created from emacsVER templates
 autogen_install_files :=  \
   debian/$(gtk_pkg_name).install  \
   debian/$(gtk_pkg_name).postinst  \
   debian/$(gtk_pkg_name).prerm  \
-  debian/$(nox_pkg_name).install  \
-  debian/$(nox_pkg_name).postinst  \
-  debian/$(nox_pkg_name).prerm
 
 define deb_sub
   perl -p  \
@@ -76,21 +65,15 @@ define deb_sub
     -e "s|\@PKG_NAME\@|$(pkg_name)|go;"  \
     -e "s|\@SRC_PKG_NAME\@|$(src_pkg_name)|go;"  \
     -e "s|\@GTK_PKG_NAME\@|$(gtk_pkg_name)|go;"  \
-    -e "s|\@NOX_PKG_NAME\@|$(nox_pkg_name)|go;"  \
       < $(1) > $(2)
 endef
 
 # Set pkg_name depending on which we are currently building.
 debian/$(gtk_pkg_name).%: pkg_name := $(gtk_pkg_name)
-debian/$(nox_pkg_name).%: pkg_name := $(nox_pkg_name)
-
 # Build emacs-snapshot.{install,...} from emacsVER.{install,...}
 debian/$(gtk_pkg_name).%: debian/emacsVER.%
 	$(call deb_sub,$<,$@)
 
-# Build emacs-snapshot-nox.{install,...} from emacsVER.{install,...}
-debian/$(nox_pkg_name).%: debian/emacsVER.%
-	$(call deb_sub,$<,$@)
 
 # Build control from control.in.
 debian/%: debian/%.in debian/changelog debian/rules
@@ -98,28 +81,23 @@ debian/%: debian/%.in debian/changelog debian/rules
 
 override_dh_auto_clean:
 	dh_auto_clean $(auto_gtk)
-	dh_auto_clean $(auto_nox)
 
 override_dh_auto_configure:
 	./autogen.sh all
 	dh_auto_configure $(auto_gtk) -- $(confflags_gtk)
-	dh_auto_configure $(auto_nox) -- $(confflags_nox)
 
 override_dh_auto_build: debian/control
 	dh_auto_build $(auto_gtk)
-	dh_auto_build $(auto_nox)
 
 # Run tests, but don't allow failures to stop the build.
 override_dh_auto_test:
 	dh_auto_test $(auto_gtk) || true
-	dh_auto_test $(auto_nox) || true
 
 # By default dh_auto_install will dump both packages into debian/tmp,
 # with the second one clobbering the first one, so we used --destdir to
 # force installation into different places.
 override_dh_auto_install: $(autogen_install_files)
 	dh_auto_install $(auto_gtk) --destdir=debian/$(gtk_pkg_name)
-	dh_auto_install $(auto_nox) --destdir=debian/$(nox_pkg_name)
 #
 #	Find the binaries that we need to pass to update-alternatives.
 	alternatives=`ls debian/$(gtk_pkg_name)/usr/bin | xargs`  \
@@ -133,8 +111,8 @@ override_dh_auto_install: $(autogen_install_files)
 # because it looks for files in debian/tmp (which does not exist). So
 # override it to instead delete the files we don't want
 override_dh_install:
-#	Strip images from NoX.
-	rm -rf debian/$(nox_pkg_name)/usr/share/emacs/*/etc/images
+#	Strip images
+	rm -rf debian/$(gtk_pkg_name)/usr/share/emacs/*/etc/images
 #
 #	Strip some unnecessary dirs
 	rm -rf debian/*/var/
@@ -153,14 +131,6 @@ override_dh_install:
 #
 #	Identify identical files, move them into -common, and delete them
 #	from the other binary packages.
-	mkdir -p debian/$(src_pkg_name)-common
-	diff --ignore-all-space --recursive --brief --report-identical-files  \
-		debian/$(gtk_pkg_name) debian/$(nox_pkg_name)  \
-		| egrep -v '(/usr/lib|/usr/bin)'  \
-		| perl -ne 's/^Files (.*) and (.*) are identical/\1\n\2/ && print'  \
-		| tar cpf - --files-from - --remove-files  \
-		| tar xpf - --directory debian/$(src_pkg_name)-common  \
-		--strip-components=2 --overwrite
 #
 #	Move non-byte-compiled versions of byte-compiled files into -el package.
 	mkdir -p debian/$(src_pkg_name)-el
