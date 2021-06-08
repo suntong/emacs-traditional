@@ -75,10 +75,6 @@ debian/$(gtk_pkg_name).%: debian/emacsVER.%
 	$(call deb_sub,$<,$@)
 
 
-# Build control from control.in.
-debian/%: debian/%.in debian/changelog debian/rules
-	$(call deb_sub,$<,$@)
-
 override_dh_auto_clean:
 	dh_auto_clean $(auto_gtk)
 
