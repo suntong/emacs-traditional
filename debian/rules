@@ -45,7 +45,7 @@ gtk_pkg_name = $(src_pkg_name)
 # Gtk config options
 confflags_gtk += $(confflags)
 confflags_gtk += --with-x=yes
-confflags_gtk += --with-x-toolkit=motif  --without-all --with-compress-info --with-gpm --with-x --with-xft --with-libotf --with-xim --with-dbus 
+confflags_gtk += --with-x-toolkit=motif --without-all --with-gpm --with-x --with-xft --with-libotf --with-xim --with-dbus 
 
 # Gtk dh options
 auto_gtk += --package=$(gtk_pkg_name)
@@ -127,13 +127,17 @@ override_dh_install:
 #	Identify identical files, move them into -common, and delete them
 #	from the other binary packages.
 #
-#	Move non-byte-compiled versions of byte-compiled files into -el package.
-	mkdir -p debian/$(src_pkg_name)-el
-	find debian/ -name '*.elc'  \
-		| perl -pe 's/(.*)\.elc/\1.el.gz/g'  \
-		| tar cpf - --files-from - --remove-files --ignore-failed-read  \
-		| tar xpf - --directory debian/$(src_pkg_name)-el  \
-		--strip-components=2 --overwrite
+#	Delete non-byte-compiled versions of byte-compiled files
+	find debian/ -name '*.elc' | sed 's/c$$//' | xargs rm
+#	Delete all that exist on the web
+	rm -f debian/$(gtk_pkg_name)/usr/share/emacs/*/etc/[A-Z]*
+	rm -rf debian/$(gtk_pkg_name)/usr/share/emacs/*/etc/forms \
+	 debian/$(gtk_pkg_name)/usr/share/emacs/*/etc/nxml \
+	 debian/$(gtk_pkg_name)/usr/share/emacs/*/etc/refcards \
+	 debian/$(gtk_pkg_name)/usr/share/emacs/*/etc/schema \
+	 debian/$(gtk_pkg_name)/usr/share/emacs/*/etc/srecode \
+	 debian/$(gtk_pkg_name)/usr/share/emacs/*/etc/tutorials \
+	 debian/$(gtk_pkg_name)/usr/share/icons debian/$(gtk_pkg_name)/usr/share/info
 
 %:
 	dh $@ --parallel
